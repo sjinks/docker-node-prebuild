@@ -1,0 +1,48 @@
+name: Build and Push
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build and push (alpine)
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          tags: wildwildangel/alpine
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          context: alpine
+          file: ./Dockerfile
+
+      - name: Build and push (devtoolset-7-toolchain-centos7)
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          tags: wildwildangel/devtoolset-7-toolchain-centos7
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          context: alpine
+          file: ./Dockerfile
