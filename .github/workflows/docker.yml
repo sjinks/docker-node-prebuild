@@ -52,7 +52,7 @@ jobs:
         with:
           images: ${{ matrix.image.name }}
           tags: |
-            type=edge,branch=$repo.default_branch
+            type=edge,branch=master
             type=schedule
             type=ref,event=branch
             type=semver,pattern={{version}}
