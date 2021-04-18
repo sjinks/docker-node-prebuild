@@ -5,15 +5,24 @@ on:
     - cron: '0 10 * * *'
   push:
     branches:
-      - master
-  pull_request:
+      - "**"
+    tags:
+      - "*.*.*"
   workflow_dispatch:
 
 jobs:
   build:
+    name: Build images
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
-
+    if: ${{ !contains(github.event.head_commit.message, '[ci skip]') || github.event_name != 'push' }}
+    strategy:
+      fail-fast: true
+      matrix:
+        image:
+          - name: wildwildangel/docker-prebuild-alpine
+            context: alpine
+          - name: wildwildangel/docker-prebuild-devtoolset-7-toolchain-centos7
+            context: devtoolset-7-toolchain-centos7
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -23,7 +32,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_LOGIN }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.event_name != 'push' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -32,26 +41,37 @@ jobs:
         uses: actions/cache@v2.1.5
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ matrix.image.context}}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.image.context}}-
             ${{ runner.os }}-buildx-
 
-      - name: Build and push (alpine)
-        uses: docker/build-push-action@v2
+      - name: Docker meta
+        id: meta
+        uses: crazy-max/ghaction-docker-meta@v2
         with:
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: wildwildangel/docker-prebuild-alpine
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
-          context: alpine
-          file: ./alpine/Dockerfile
+          images: ${{ matrix.image.name }}
+          tags: |
+            type=edge,branch=$repo.default_branch
+            type=schedule
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
-      - name: Build and push (devtoolset-7-toolchain-centos7)
-        uses: docker/build-push-action@v2
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2.3.0
         with:
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: wildwildangel/docker-prebuild-devtoolset-7-toolchain-centos7
+          context: ${{ matrix.image.context }}
+          pull: true
+          push: ${{ github.event_name != 'push' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
-          context: devtoolset-7-toolchain-centos7
-          file: ./devtoolset-7-toolchain-centos7/Dockerfile
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
