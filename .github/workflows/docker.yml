@@ -46,9 +46,9 @@ jobs:
             ${{ runner.os }}-buildx-${{ matrix.image.context}}-
             ${{ runner.os }}-buildx-
 
-      - name: Docker meta
+      - name: Set up Docker Metadata
         id: meta
-        uses: crazy-max/ghaction-docker-meta@v2
+        uses: docker/metadata-action@v3.4.1
         with:
           images: ${{ matrix.image.name }}
           tags: |
