@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, '[ci skip]') || github.event_name != 'push' }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         image:
           - name: wildwildangel/docker-prebuild-alpine
@@ -27,7 +27,7 @@ jobs:
             platform: linux/amd64,linux/386
           - name: wildwildangel/docker-prebuild-centos7
             context: centos7
-            platform: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
+            platform: linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le
     steps:
       - name: Checkout
         uses: actions/checkout@v2.4.0
