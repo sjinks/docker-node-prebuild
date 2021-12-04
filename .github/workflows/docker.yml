@@ -21,13 +21,13 @@ jobs:
         image:
           - name: wildwildangel/docker-prebuild-alpine
             context: alpine
-            platform: linux/amd64,linux/386
+            platform: linux/amd64
           - name: wildwildangel/docker-prebuild-devtoolset-7-toolchain-centos7
             context: devtoolset-7-toolchain-centos7
-            platform: linux/amd64,linux/386
+            platform: linux/amd64
           - name: wildwildangel/docker-prebuild-centos7
             context: centos7
-            platform: linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le
+            platform: linux/amd64,linux/arm/v7,linux/arm64/v8
     steps:
       - name: Checkout
         uses: actions/checkout@v2.4.0
