@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:lts-alpine
 RUN apk --no-cache -U upgrade && apk add --no-cache python3 make g++
 WORKDIR /usr/src/app
 VOLUME /usr/src/app
