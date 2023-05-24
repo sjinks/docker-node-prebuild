@@ -2,7 +2,7 @@ FROM centos/devtoolset-7-toolchain-centos7@sha256:24d4c230cb1fe8e68cefe068458f52
 USER root
 RUN \
     curl -LfSs https://rpm.nodesource.com/setup_16.x | bash - && \
-    yum install -y nodejs && \
+    yum install -y nodejs pyhton3 && \
     yum clean all -y
 
 WORKDIR /usr/src/app
