@@ -1,8 +1,6 @@
 name: Docker CI
 
 on:
-  schedule:
-    - cron: '0 10 * * *'
   push:
     branches:
       - "**"
@@ -53,13 +51,11 @@ jobs:
         with:
           images: ${{ matrix.image.name }}
           tags: |
-            type=edge,branch=master
-            type=schedule
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4.0.0
@@ -68,7 +64,7 @@ jobs:
           platforms: ${{ matrix.image.platform }}
           pull: true
           push: ${{ github.event_name != 'push' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.image.context }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image.context }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
