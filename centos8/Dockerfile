@@ -1,4 +1,4 @@
-FROM centos:8
+FROM centos:8@sha256:a27fd8080b517143cbbbab9dfb7c8571c40d67d534bbdee55bd6c473f432b177
 RUN \
     curl -fsSL https://rpm.nodesource.com/setup_lts.x | bash - && \
     sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
