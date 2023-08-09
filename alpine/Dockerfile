@@ -1,4 +1,4 @@
-FROM node:lts-alpine@sha256:d5b2a7869a4016b1847986ea52098fa404421e44281bb7615a9e3615e07f37fb
+FROM node:lts-alpine@sha256:58878e9e1ed3911bdd675d576331ed8838fc851607aed3bb91e25dfaffab3267
 RUN apk --no-cache -U upgrade && apk add --no-cache python3 make g++
 WORKDIR /usr/src/app
 VOLUME /usr/src/app
