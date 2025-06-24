@@ -18,15 +18,14 @@ jobs:
   prebuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2.1.3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: lts/*
       - run: npm ci
       - run: npm run build
       - run: |
           docker run --rm -v $(pwd):/usr/src/app wildwildangel/docker-prebuild-alpine npx prebuild -r napi -u ${{ secrets.GITHUB_TOKEN }}
-          docker run --rm -v $(pwd):/usr/src/app wildwildangel/docker-prebuild-devtoolset-7-toolchain-centos7 npx prebuild -r napi -u ${{ secrets.GITHUB_TOKEN }}
 ```
 
 2. Update your `package.json`, add something like this into `scripts`:
