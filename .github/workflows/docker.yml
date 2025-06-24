@@ -22,9 +22,6 @@ jobs:
           - name: wildwildangel/docker-prebuild-alpine
             context: alpine
             platform: linux/amd64
-          - name: wildwildangel/docker-prebuild-devtoolset-7-toolchain-centos7
-            context: devtoolset-7-toolchain-centos7
-            platform: linux/amd64
           - name: wildwildangel/docker-prebuild-centos8
             context: centos8
             platform: linux/amd64,linux/arm64/v8
